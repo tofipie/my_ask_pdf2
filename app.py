@@ -1,118 +1,105 @@
 import streamlit as st
 from dotenv import load_dotenv
-import pickle
 from PyPDF2 import PdfReader
-from streamlit_extras.add_vertical_space import add_vertical_space
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.llms import OpenAI
-from langchain.chains.question_answering import load_qa_chain
-from langchain.callbacks import get_openai_callback
-import os
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+from htmlTemplates import css, bot_template, user_template
+from langchain.llms import HuggingFaceHub
 
-st.set_page_config(page_title='🤗💬 PDF Chat App - GPT')
-
-# Sidebar contents
-with st.sidebar:
-    st.title('🤗💬 PDF Chat App')
-    st.markdown('''
-    ## About
-    This app is an LLM-powered chatbot built using:
-    - [Streamlit](https://streamlit.io/)
-    - [LangChain](https://python.langchain.com/)
-    - [OpenAI](https://platform.openai.com/docs/models) LLM model
-
-    ''')
-    add_vertical_space(5)
-    st.write('Made with ❤️ by [Livia Ellen](https://liviaellen.com/portfolio)')
+def get_pdf_text(pdf_docs):
+    text = ""
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
 
 
+def get_text_chunks(text):
+    text_splitter = CharacterTextSplitter(
+        separator="\n",
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len
+    )
+    chunks = text_splitter.split_text(text)
+    return chunks
+
+
+def get_vectorstore(text_chunks):
+  #  embeddings = OpenAIEmbeddings()
+    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+
+
+def get_conversation_chain(vectorstore):
+       
+  #  llm = ChatOpenAI()
+    llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+
+    memory = ConversationBufferMemory(
+        memory_key='chat_history', return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
+    )
+    return conversation_chain
+
+
+def handle_userinput(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
+
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
 
 
 def main():
-    st.header("Talk to your PDF 💬")
-    st.write("This app uses OpenAI's LLM model to answer questions about your PDF file. Upload your PDF file and ask questions about it. The app will return the answer from your PDF file.")
+    load_dotenv()
+    st.set_page_config(page_title="Chat with multiple PDFs",
+                       page_icon=":books:")
+    st.write(css, unsafe_allow_html=True)
 
-    st.header("1. Pass your OPEN AI API KEY here")
-    v='demo'
-    openai_key=st.text_input("**OPEN AI API KEY**", value=v)
-    st.write("You can get your OpenAI API key from [here](https://platform.openai.com/account/api-keys)")
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = None
 
+    st.header("Chat with multiple PDFs :books:")
+    user_question = st.text_input("Ask a question about your documents:")
+    if user_question:
+        handle_userinput(user_question)
 
-    if openai_key==v:
-        openai_key=st.secrets["OPENAI_API_KEY"]
-    # if openai_key=='':
-    #     load_dotenv()
-    os.environ["OPENAI_API_KEY"] = openai_key
+    with st.sidebar:
+        st.subheader("Your documents")
+        pdf_docs = st.file_uploader(
+            "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
+        if st.button("Process"):
+            with st.spinner("Processing"):
+                # get pdf text
+                raw_text = get_pdf_text(pdf_docs)
 
-    # upload a PDF file
+                # get the text chunks
+                text_chunks = get_text_chunks(raw_text)
 
-    st.header("2. Upload PDF")
-    pdf = st.file_uploader("**Upload your PDF**", type='pdf')
+                # create vector store
+                vectorstore = get_vectorstore(text_chunks)
 
-    # st.write(pdf)
+                # create conversation chain
+                st.session_state.conversation = get_conversation_chain(
+                    vectorstore)
 
-    if pdf is not None:
-        pdf_reader = PdfReader(pdf)
-
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-            length_function=len
-            )
-        chunks = text_splitter.split_text(text=text)
-
-        # # embeddings
-        store_name = pdf.name[:-4]
-        st.write(f'{store_name}')
-        # st.write(chunks)
-
-        if os.path.exists(f"{store_name}.pkl"):
-            with open(f"{store_name}.pkl", "rb") as f:
-                VectorStore = pickle.load(f)
-            # st.write('Embeddings Loaded from the Disk')s
-        else:
-            embeddings = OpenAIEmbeddings()
-            VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
-            with open(f"{store_name}.pkl", "wb") as f:
-                pickle.dump(VectorStore, f)
-
-        # embeddings = OpenAIEmbeddings()
-        # VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
-
-    # st.header("or.. Try it with this The Alchaemist PDF book")
-    # if st.button('Ask The Alchemist Book Questions'):
-    #     with open("The_Alchemist.pkl", "rb") as f:
-    #         VectorStore = pickle.load(f)
-        # Accept user questions/query
-        st.header("3. Ask questions about your PDF file:")
-        q="Tell me about the content of the PDF"
-        query = st.text_input("Questions",value=q)
-        # st.write(query)
-
-        if st.button("Ask"):
-            # st.write(openai_key)
-            # os.environ["OPENAI_API_KEY"] = openai_key
-            if openai_key=='':
-                st.write('Warning: Please pass your OPEN AI API KEY on Step 1')
-            else:
-                docs = VectorStore.similarity_search(query=query, k=3)
-
-                llm = OpenAI()
-                chain = load_qa_chain(llm=llm, chain_type="stuff")
-                with get_openai_callback() as cb:
-                    response = chain.run(input_documents=docs, question=query)
-                    print(cb)
-                st.header("Answer:")
-                st.write(response)
-                st.write('--')
-                st.header("OpenAI API Usage:")
-                st.text(cb)
 
 if __name__ == '__main__':
     main()
