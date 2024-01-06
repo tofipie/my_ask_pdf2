@@ -71,10 +71,10 @@ def main():
                        page_icon=":books:")
     st.write(css, unsafe_allow_html=True)
 
-  #  if "conversation" not in st.session_state:
-   #     st.session_state.conversation = None
-    #if "chat_history" not in st.session_state:
-     #   st.session_state.chat_history = None
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = 'hi'
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = 'hi'
 
     st.header("Chat with multiple PDFs :books:")
     user_question = st.text_input("Ask a question about your documents:")
