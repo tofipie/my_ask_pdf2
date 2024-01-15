@@ -97,3 +97,5 @@ def main():
     if user_input and button:
             summary = create_RetrievalQA_chain(user_input)
             st.write("Summary : ", summary)
+if __name__ == "__main__":
+    main()
