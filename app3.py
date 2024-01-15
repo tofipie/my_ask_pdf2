@@ -100,6 +100,6 @@ def main():
     button = st.button("Generate Answer")
     if user_input and button:
             summary = create_RetrievalQA_chain(user_input)
-            st.write("Summary : ", summary)
+            st.write(summary)
 if __name__ == "__main__":
     main()
