@@ -84,7 +84,7 @@ def create_RetrievalQA_chain(query):
     return_source_documents=True,
     chain_type_kwargs={"prompt": PROMPT})
   
-  answer = qa({"query": query})
+  answer = qa({"query": query})['result']
   return answer
 
 
