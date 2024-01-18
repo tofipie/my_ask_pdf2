@@ -6,7 +6,7 @@ from streamlit_chat import message
 import tempfile
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import HuggingFaceHub
-from utils import get_data_files, reset_conversation
+#from utils import get_data_files, reset_conversation
 
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
@@ -43,7 +43,10 @@ llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
 
         # Create a conversational chain
 chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
-
+def reset_conversation():
+    st.session_state.conversation = None
+    st.session_state.chat_history = None
+    st.session_state.messages = []
 st.title("PDF Chat Using AWS Bedrock and Anthropic Claude 💬")
 
 max_tokens = st.number_input('Max Tokens', value=1000)
