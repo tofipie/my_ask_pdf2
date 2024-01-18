@@ -9,69 +9,56 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
 
-DB_FAISS_PATH = 'vectorstore/db_faiss'
+DB_FAISS_PATH = "vectorstores/db_faiss"
+DATA_PATH = "pdfs/"
 
+loader = DirectoryLoader(DATA_PATH, glob="*.pdf", loader_cls=PyPDFLoader)
+documents = loader.load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+texts = text_splitter.split_documents(documents)
 
-class FileIngestor:
-    def __init__(self, uploaded_file):
-        self.uploaded_file = uploaded_file
+embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"},
+    )
 
-    def handlefileandingest(self):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(self.uploaded_file.getvalue())
-            tmp_file_path = tmp_file.name
+db = FAISS.from_documents(texts, embeddings)
+db.save_local(DB_FAISS_PATH)
+    
 
-        #loader = PyMuPDFLoader(file_path=tmp_file_path)
-        loader = PyPDFDirectoryLoader(tmp_file_path)
-        documents = loader.load()
-        # - in our testing Character split works better with this PDF data set
+# Create embeddings using Sentence Transformers
+embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
 
-        text_splitter = RecursiveCharacterTextSplitter(
-       # Set a really small chunk size, just to show.
-        chunk_size = 500,
-        chunk_overlap  = 50,
-        )
-        data = text_splitter.split_documents(documents)
-
-
-        
-
-        # Create embeddings using Sentence Transformers
-        embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
-
-        # Create a FAISS vector store and save embeddings
-        db = FAISS.from_documents(data, embeddings)
-        db.save_local(DB_FAISS_PATH)
+# Create a FAISS vector store and save embeddings
 
         # Load the language model
-        #llm = Loadllm.load_llm()
-        llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
+llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
                     model_kwargs={"temperature":0.5, "max_length":512},
                              huggingfacehub_api_token='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')
 
         # Create a conversational chain
-        chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
+chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
 
         # Function for conversational chat
-        def conversational_chat(query):
-            result = chain({"question": query, "chat_history": st.session_state['history']})
-            st.session_state['history'].append((query, result["answer"]))
-            return result["answer"]
+def conversational_chat(query):
+    result = chain({"question": query, "chat_history": st.session_state['history']})
+    st.session_state['history'].append((query, result["answer"]))
+    return result["answer"]
 
         # Initialize chat history
-        if 'history' not in st.session_state:
-            st.session_state['history'] = []
+if 'history' not in st.session_state:
+    st.session_state['history'] = []
 
         # Initialize messages
-        if 'generated' not in st.session_state:
-            st.session_state['generated'] = ["Hello ! Ask me(LLAMA2) about " + self.uploaded_file.name + " 🤗"]
+if 'generated' not in st.session_state:
+    st.session_state['generated'] = ["Hello ! Ask me(LLAMA2) about " + self.uploaded_file.name + " 🤗"]
 
-        if 'past' not in st.session_state:
-            st.session_state['past'] = ["Hey ! 👋"]
+if 'past' not in st.session_state:
+    st.session_state['past'] = ["Hey ! 👋"]
 
         # Create containers for chat history and user input
-        response_container = st.container()
-        container = st.container()
+response_container = st.container()
+container = st.container()
 
         # User input form
         with container:
