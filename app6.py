@@ -4,6 +4,8 @@ from langchain.document_loaders import PyMuPDFLoader
 from streamlit_chat import message
 import tempfile
 from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.llms import HuggingFaceHub
+
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
