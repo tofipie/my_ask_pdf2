@@ -9,3 +9,7 @@ streamlit-extras
 sentence-transformers==2.2.2
 pypdf
 transformers
+
+
+hugchat
+streamlit-chat
