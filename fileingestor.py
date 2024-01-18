@@ -19,7 +19,9 @@ class FileIngestor:
             tmp_file.write(self.uploaded_file.getvalue())
             tmp_file_path = tmp_file.name
 
-        loader = PyMuPDFLoader(file_path=tmp_file_path)
+        #loader = PyMuPDFLoader(file_path=tmp_file_path)
+        loader = PyPDFDirectoryLoader(tmp_file_path)
+
         data = loader.load()
 
         # Create embeddings using Sentence Transformers
