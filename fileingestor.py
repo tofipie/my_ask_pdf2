@@ -6,6 +6,7 @@ import tempfile
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
+from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
