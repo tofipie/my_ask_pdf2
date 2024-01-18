@@ -43,6 +43,23 @@ llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
         # Create a conversational chain
 chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
 
+st.title("PDF Chat Using AWS Bedrock and Anthropic Claude 💬")
+
+max_tokens = st.number_input('Max Tokens', value=1000)
+temperature= st.number_input(label="Temperature",step=.1,format="%.2f", value=0.7)
+llm_model = st.selectbox("Select LLM", ["Anthropic Claude V2", "Amazon Titan Text Express v1", "Ai21 Labs Jurassic-2 Ultra"])
+
+
+# Create a sidebar and a button to reset the chat, using our reset_conversation function from utils.py
+# Also display a list of all files in the data folder that were used to train our model
+st.sidebar.title("App Description")
+with st.sidebar:
+    st.button('New Chat', on_click=reset_conversation)
+    st.write("Files loaded in VectorDB:")
+    for file in get_data_files():
+        st.markdown("- " + file)
+    st.write('Made by Noa Cohen')
+
         # Function for conversational chat
 def conversational_chat(query):
     result = chain({"question": query, "chat_history": st.session_state['history']})
@@ -67,7 +84,7 @@ container = st.container()
 # User input form
 with container:
         with st.form(key='my_form', clear_on_submit=True):
-                user_input = st.text_input("Query:", placeholder="Talk to PDF data 🧮", key='input')
+                user_input = st.text_input("Query:", placeholder="Talk to PDF data", key='input')
                 submit_button = st.form_submit_button(label='Send')
 
         if submit_button and user_input:
