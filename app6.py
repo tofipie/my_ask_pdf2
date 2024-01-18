@@ -47,6 +47,14 @@ def reset_conversation():
     st.session_state.conversation = None
     st.session_state.chat_history = None
     st.session_state.messages = []
+
+def get_data_files():
+    data_files = []
+    for dirname, _, filenames in os.walk("pdfs"):
+        for filename in filenames:
+            data_files.append(os.path.join(filename))
+    return data_files
+        
 st.title("PDF Chat Using AWS Bedrock and Anthropic Claude 💬")
 
 max_tokens = st.number_input('Max Tokens', value=1000)
