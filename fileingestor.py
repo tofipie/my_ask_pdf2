@@ -56,11 +56,11 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = ["Hey ! 👋"]
 
-        # Create containers for chat history and user input
+# Create containers for chat history and user input
 response_container = st.container()
 container = st.container()
 
-        # User input form
+# User input form
 with container:
         with st.form(key='my_form', clear_on_submit=True):
                 user_input = st.text_input("Query:", placeholder="Talk to PDF data 🧮", key='input')
@@ -71,7 +71,7 @@ with container:
                 st.session_state['past'].append(user_input)
                 st.session_state['generated'].append(output)
 
-        # Display chat history
+# Display chat history
 if st.session_state['generated']:
         with response_container:
                 for i in range(len(st.session_state['generated'])):
