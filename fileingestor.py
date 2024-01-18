@@ -22,8 +22,18 @@ class FileIngestor:
 
         #loader = PyMuPDFLoader(file_path=tmp_file_path)
         loader = PyPDFDirectoryLoader(tmp_file_path)
+        documents = loader.load()
+        # - in our testing Character split works better with this PDF data set
 
-        data = loader.load()
+        text_splitter = RecursiveCharacterTextSplitter(
+       # Set a really small chunk size, just to show.
+        chunk_size = 500,
+        chunk_overlap  = 50,
+        )
+        data = text_splitter.split_documents(documents)
+
+
+        
 
         # Create embeddings using Sentence Transformers
         embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
