@@ -12,7 +12,7 @@ from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTex
 DB_FAISS_PATH = "vectorstores/db_faiss"
 DATA_PATH = "pdfs/"
 
-loader = DirectoryLoader(DATA_PATH, glob="*.pdf", loader_cls=PyPDFLoader)
+loader = PyPDFDirectoryLoader(DATA_PATH, glob="*.pdf", loader_cls=PyPDFLoader)
 documents = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
 texts = text_splitter.split_documents(documents)
