@@ -8,11 +8,12 @@ from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 
 DB_FAISS_PATH = "vectorstores/db_faiss"
 DATA_PATH = "pdfs/"
 
-loader = PyPDFDirectoryLoader(DATA_PATH, glob="*.pdf", loader_cls=PyPDFLoader)
+loader = DirectoryLoader(DATA_PATH, glob="*.pdf", loader_cls=PyPDFLoader)
 documents = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
 texts = text_splitter.split_documents(documents)
