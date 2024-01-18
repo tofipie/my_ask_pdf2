@@ -1,3 +1,4 @@
+#https://medium.com/@gaurav.jaik86/building-an-ai-powered-chat-with-pdf-app-with-streamlit-langchain-faiss-and-llama2-affadea65737
 import streamlit as st
 from langchain.document_loaders import PyMuPDFLoader
 #from loadllm import Loadllm
@@ -54,7 +55,7 @@ if 'history' not in st.session_state:
 
         # Initialize messages
 if 'generated' not in st.session_state:
-    st.session_state['generated'] = ["Hello ! Ask me(LLAMA2) about " + self.uploaded_file.name + " 🤗"]
+    st.session_state['generated'] = ["Hello ! Ask me(LLAMA2) about " + " 🤗"] #+ self.uploaded_file.name + 
 
 if 'past' not in st.session_state:
     st.session_state['past'] = ["Hey ! 👋"]
