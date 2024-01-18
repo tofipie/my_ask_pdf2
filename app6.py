@@ -6,6 +6,7 @@ from streamlit_chat import message
 import tempfile
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import HuggingFaceHub
+from utils import get_data_files, reset_conversation
 
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
