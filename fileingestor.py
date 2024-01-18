@@ -7,6 +7,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
+from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
 
