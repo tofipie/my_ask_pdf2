@@ -44,7 +44,10 @@ class FileIngestor:
         db.save_local(DB_FAISS_PATH)
 
         # Load the language model
-        llm = Loadllm.load_llm()
+        #llm = Loadllm.load_llm()
+        llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
+                    model_kwargs={"temperature":0.5, "max_length":512},
+                             huggingfacehub_api_token='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')
 
         # Create a conversational chain
         chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
