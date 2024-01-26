@@ -32,11 +32,11 @@ db.save_local(DB_FAISS_PATH)
     
 
 # Create embeddings using Sentence Transformers
-embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+#embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
 
 # Create a FAISS vector store and save embeddings
 
-        # Load the language model
+# Load the language model
 llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
                     model_kwargs={"temperature":0.5, "max_length":512},
                              huggingfacehub_api_token='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')
@@ -57,9 +57,9 @@ def get_data_files():
         
 st.title("PDF Chat Using AWS Bedrock and Anthropic Claude 💬")
 
-max_tokens = st.number_input('Max Tokens', value=1000)
-temperature= st.number_input(label="Temperature",step=.1,format="%.2f", value=0.7)
-llm_model = st.selectbox("Select LLM", ["Anthropic Claude V2", "Amazon Titan Text Express v1", "Ai21 Labs Jurassic-2 Ultra"])
+#max_tokens = st.number_input('Max Tokens', value=1000)
+#temperature= st.number_input(label="Temperature",step=.1,format="%.2f", value=0.7)
+#llm_model = st.selectbox("Select LLM", ["Anthropic Claude V2", "Amazon Titan Text Express v1", "Ai21 Labs Jurassic-2 Ultra"])
 
 
 # Create a sidebar and a button to reset the chat, using our reset_conversation function from utils.py
@@ -84,10 +84,10 @@ if 'history' not in st.session_state:
 
         # Initialize messages
 if 'generated' not in st.session_state:
-    st.session_state['generated'] = ["Hello ! Ask me(LLAMA2) about " + " 🤗"] #+ self.uploaded_file.name + 
+    st.session_state['generated'] = []#["Hello ! Ask me(LLAMA2) about " + " 🤗"] + self.uploaded_file.name + 
 
 if 'past' not in st.session_state:
-    st.session_state['past'] = ["Hey ! 👋"]
+    st.session_state['past'] = []#["Hey ! 👋"]
 
 # Create containers for chat history and user input
 response_container = st.container()
@@ -108,5 +108,5 @@ with container:
 if st.session_state['generated']:
         with response_container:
                 for i in range(len(st.session_state['generated'])):
-                        message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="🦖")
+                        message(st.session_state["past"][i], is_user=True, key=str(i) + '_user')
                         message(st.session_state["generated"][i], key=str(i), avatar_style="🦖")
