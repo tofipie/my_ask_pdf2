@@ -101,7 +101,7 @@ with container:
             #    submit_button = st.form_submit_button(label='Send')
 
        # if submit_button and user_input:
-         if user_input:
+        if user_input:
                 output = conversational_chat(user_input)
                 st.session_state['past'].append(user_input)
                 st.session_state['generated'].append(output)
