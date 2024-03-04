@@ -60,11 +60,6 @@ embeddings = HuggingFaceEmbeddings(
         model_kwargs={"device": "cpu"},
     )
 
-llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
-                    model_kwargs={"temperature":0.5, "max_length":512},
-                     huggingfacehub_api_token='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')
-
-
 
 DATA_PATH = "pdfs/"
 HUGGINGFACEHUB_API_TOKEN = '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'
@@ -86,7 +81,12 @@ vectorstore_faiss = FAISS.from_documents(docs, embeddings)
 # Main Streamlit app
 
 def main():
-    st.title("Chat PDF Using AWS Bedrock and Anthropic Claude")
+    st.title("PDF Chat Using AWS Bedrock and Anthropic Claude 💬")
+    temperature= st.number_input(label="Temperature",step=.1,format="%.2f", value=0.7)
+    llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
+                    model_kwargs={"temperature":temperature, "max_length":512},
+                     huggingfacehub_api_token='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')
+
     with st.sidebar:
         st.title('💬 PDF Chat App')
         st.button('New Chat', on_click=reset_conversation)
