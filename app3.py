@@ -36,7 +36,7 @@ def create_RetrievalQA_chain(query):
     return_source_documents=True,
     chain_type_kwargs={"prompt": PROMPT})
   
-  answer = qa({"query": query})['result']
+  answer = qa({"query": query}) #return all answer from llm #qa({"query": query})['result'] return just answer of llm
   return answer
 
 prompt_template = """
@@ -94,8 +94,6 @@ def main():
         st.write('Made by Noa Cohen')
             
   
-
-
     user_input = st.text_area("Ask Your Question")
     button = st.button("Generate Answer")
     if user_input and button:
