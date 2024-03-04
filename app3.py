@@ -79,12 +79,13 @@ docs = text_splitter.split_documents(documents)
 vectorstore_faiss = FAISS.from_documents(docs, embeddings)
 
 # Main Streamlit app
+temperature= st.number_input(label="Temperature",step=.1,format="%.2f", value=0.7)
+
 llm = HuggingFaceHub(repo_id="google/flan-t5-xxl",
                     model_kwargs={"temperature":temperature, "max_length":512},
                      huggingfacehub_api_token='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')
 def main():
     st.title("PDF Chat Using AWS Bedrock and Anthropic Claude 💬")
-    temperature= st.number_input(label="Temperature",step=.1,format="%.2f", value=0.7)
     
 
     with st.sidebar:
