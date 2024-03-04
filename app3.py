@@ -83,14 +83,15 @@ docs = text_splitter.split_documents(documents)
 vectorstore_faiss = FAISS.from_documents(docs, embeddings)
 
 # Main Streamlit app
+
 def main():
     st.title("Chat PDF Using AWS Bedrock and Anthropic Claude")
     with st.sidebar:
         st.title('💬 PDF Chat App')
-        st.markdown('''
-        ## About
-        בחר מסמך ולאחר מכן שאל שאלה
-        ''')
+        st.button('New Chat', on_click=reset_conversation)
+        st.write("Files loaded in VectorDB:")
+        for file in get_data_files():
+          st.markdown("- " + file)
         st.write('Made by Noa Cohen')
             
   
